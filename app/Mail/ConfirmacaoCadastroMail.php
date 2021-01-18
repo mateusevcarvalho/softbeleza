@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 class ConfirmacaoCadastroMail extends Mailable
 {
     use Queueable, SerializesModels;
+
     public $usuarioId;
 
     /**
@@ -31,12 +32,10 @@ class ConfirmacaoCadastroMail extends Mailable
     {
         $usuario = Usuario::with(['individuo', 'tenant'])->findOrFail($this->usuarioId);
         $primeiroNome = primeiro_nome($usuario->individuo->nome);
-        $linkConfirmacaoCadastro = url('confirmacao/' . $usuario->tenant->uuid);
+        $url = url('confirmacao/' . $usuario->tenant->uuid);
 
-        $this->subject('Bem vindo!');
-        $this->to($usuario->email, $usuario->individuo->nome);
-
-        return $this->view('mail.confirmacao-cadastro', compact('usuario', 'primeiroNome',
-            'linkConfirmacaoCadastro'));
+        return $this->to($usuario->email)
+            ->subject('Bem vindo!')
+            ->markdown('mail.confirmacao-cadastro', compact('usuario', 'primeiroNome', 'url'));
     }
 }
