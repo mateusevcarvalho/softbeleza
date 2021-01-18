@@ -19,6 +19,8 @@ Route::get('/locais', 'Api\LocaisController@index');
 Route::get('/tipos-estabelecimentos', 'Api\TiposEstabelecimentosController@index');
 Route::post('/cadastro', [AutenticacaoController::class, 'create']);
 Route::post('/confirmar', [AutenticacaoController::class, 'confirmar']);
+Route::post('/enviar-email-recuperacao-senha', [AutenticacaoController::class, 'enviarEmailRecupearSenha']);
+Route::put('/recuperacao-senha/{uuid}', [AutenticacaoController::class, 'recuperarSenha'])->name('recuperar-senha');
 
 Route::get('/buscar-tenant/{uuid}', 'Api\AutenticacaoController@buscarTenantUuid');
 

@@ -5,8 +5,7 @@
                 Digite seu email para recuperar a senha.
             </p>
 
-            <form @submit.prevent="cadastro" @keydown="form.onKeydown($event)" v-if="!formSubmit">
-
+            <form @submit.prevent="cadastro" @keydown="form.onKeydown($event)">
                 <div class="input-group mb-3">
                     <input type="email" class="form-control" placeholder="Email" v-model="form.email" required
                            :class="{ 'is-invalid': form.errors.has('email') }">
@@ -33,9 +32,9 @@
             </form>
 
 
-            <div class="mt-3 text-center" v-if="!formSubmit">
+            <div class="mt-3 text-center">
                 <router-link :to="{name: 'login'}" class="text-center">
-                    Acessar Login
+                    Voltar para o login
                 </router-link>
             </div>
         </div>
@@ -44,27 +43,34 @@
 </template>
 
 <script>
-    import {mapActions, mapState} from 'vuex'
-    import {Form} from 'vform'
+import {Form} from 'vform'
 
-    export default {
-        name: "RecuperarSenha",
-        data() {
-            return {
-                formSubmit: false,
-                form: new Form({
-                    email: ''
-                })
-            }
-        },
-        methods: {
-            cadastro() {
-                this.form.post('/api/recuperar-senha').then(({data}) => {
-                    this.formSubmit = true;
-                });
-            }
-        },
-    }
+export default {
+    name: "RecuperarSenha",
+    data() {
+        return {
+            formSubmit: false,
+            form: new Form({
+                email: ''
+            })
+        }
+    },
+    methods: {
+        cadastro() {
+            this.form.post('/api/enviar-email-recuperacao-senha').then(({data}) => {
+                this.formSubmit = true;
+                this.$swal.fire('Email enviado!', data.msg, 'success');
+                this.form.reset();
+            }).catch(error => {
+                if (error.hasOwnProperty('response') && error.response.status === 404) {
+                    this.$swal.fire('Ooops!', 'Email informado não encontrado.', 'warning');
+                } else {
+                    this.$swal.fire('Ooops!', 'Sistema instável no momento, tente mais tarde!', 'error');
+                }
+            });
+        }
+    },
+}
 </script>
 
 <style scoped>

@@ -6,6 +6,7 @@ use App\Events\CadastroSistemaEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CadastroSistemaRequest;
 use App\Http\Requests\ConfirmacaoRequest;
+use App\Mail\RecoverPasswordMail;
 use App\Managers\TenantManager;
 use App\Models\ControleAcesso;
 use App\Models\HorarioAtendimentoEstabelecimento;
@@ -19,6 +20,8 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -180,5 +183,28 @@ class AutenticacaoController extends Controller
     {
         $acessos = ControleAcesso::all();
         return response()->json($acessos);
+    }
+
+    public function enviarEmailRecupearSenha(Request $request)
+    {
+        $usuario = Usuario::with('individuo')->where('email', $request->get('email'))->first();
+        if ($usuario) {
+            $url = url('nova-senha/' . $usuario->uuid);
+            Mail::send(new RecoverPasswordMail($url, $usuario));
+            return response()->json(['msg' => 'Verifique sua caixa de entrada ou span.']);
+        }
+
+        return response()->json(['msg' => 'usuário não encontrado'], 404);
+    }
+
+    public function recuperarSenha(Request $request, $uuid)
+    {
+        $usuario = Usuario::with('individuo')->where('uuid', $uuid)->first();
+        if ($usuario) {
+            $usuario->update(['password' => Hash::make($request->get('password'))]);
+            return response()->json(['msg' => 'Senha alterada com sucesso.']);
+        }
+
+        return response()->json(['msg' => 'usuário não encontrado'], 404);
     }
 }

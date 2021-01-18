@@ -24,11 +24,13 @@ import "vue-cal/dist/vuecal.css";
 import 'vue-cal/dist/i18n/pt-br'
 import ECharts from 'vue-echarts' // refers to components/ECharts.vue in webpack
 import Auth from './auth'
+import VueSweetalert2 from 'vue-sweetalert2';
 
 // import ECharts modules manually to reduce bundle size
 import 'echarts/lib/chart/line'
 import 'echarts/lib/chart/bar'
 import 'echarts/lib/component/tooltip'
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 // If you want to use ECharts extensions, just import the extension package and it will work
 // Taking ECharts-GL as an example:
@@ -41,6 +43,7 @@ const options = {
     }
 };
 
+Vue.use(VueSweetalert2);
 Vue.use(Snotify, options);
 Vue.use(VueTheMask);
 Vue.use(VueResource);

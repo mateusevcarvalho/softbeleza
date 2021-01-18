@@ -24,6 +24,7 @@ import RateioProfissional from "../pages/relatorios/rateio-profissional/RateioPr
 import Aniversariantes from "../pages/relatorios/aniversariantes/Aniversariantes";
 import MeusDados from "../pages/meus-dados/MeusDados";
 import RecuperarSenha from "../pages/autenticacao/RecuperarSenha";
+import NovaSenha from "../pages/autenticacao/NovaSenha";
 
 const routes = [
     {
@@ -32,6 +33,7 @@ const routes = [
             {name: 'registro', path: '/cadastro', component: Registro, meta: {requireAuth: false}},
             {name: 'confirmacao', path: '/confirmacao/:id', component: Confirmacao, meta: {requireAuth: false}},
             {name: 'recuperar-senha', path: '/recuperar-senha', component: RecuperarSenha, meta: {requireAuth: false}},
+            {name: 'recuperar-senha-id', path: '/nova-senha/:id', component: NovaSenha, meta: {requireAuth: false}},
         ]
     },
 
