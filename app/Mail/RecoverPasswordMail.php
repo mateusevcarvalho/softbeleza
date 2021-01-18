@@ -11,6 +11,7 @@ class RecoverPasswordMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    public $tries = 5;
     private $url;
     private $usuario;
 
