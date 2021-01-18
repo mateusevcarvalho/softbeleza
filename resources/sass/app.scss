@@ -1,0 +1,62 @@
+// variables
+@import "variables";
+
+// bootstrap
+@import "~bootstrap/scss/bootstrap";
+@import '~bootstrap-vue/dist/bootstrap-vue.css';
+
+//adminLte
+@import "~admin-lte/dist/css/adminlte.min.css";
+
+// font awesome 5
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+@import "~@fortawesome/fontawesome-free/scss/brands";
+
+//NProgress
+@import "~nprogress/nprogress.css";
+
+//Snotify
+@import "~vue-snotify/styles/material";
+
+//Vue Select
+@import "~vue-select/src/scss/vue-select";
+
+//  Selected
+.vs__search, .vs__search:focus {
+    height: 28px !important;
+}
+
+
+.vuecal__menu {
+    background-color: #343a40 !important;
+    color: #fff !important;
+}
+
+.vuecal__event.leisure {
+    background-color: rgb(0, 123, 255, .8) !important;
+    border: 1px solid $primary-color !important;
+    color: #fff !important;
+    cursor: pointer;
+}
+
+.vuecal__cell-split.striped_dark {
+    background-color: rgba(0, 0, 0, .05);
+}
+
+.vuecal__cell-split.striped_dark:hover {
+    border: 1px solid rgb(0, 123, 255, .8) !important;
+    cursor: pointer;
+}
+
+.vuecal__cell-split.striped_light:hover {
+    border: 1px solid rgb(0, 123, 255, .8) !important;
+    box-shadow: $primary-color;
+    cursor: pointer;
+}
+
+.alert-soft-success {
+    background-color: #2cb76b;
+    color: white;
+}
+
