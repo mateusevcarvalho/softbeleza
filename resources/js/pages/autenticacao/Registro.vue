@@ -1,9 +1,9 @@
 <template>
     <div class="card">
         <div class="card-body register-card-body">
-            <p class="login-box-msg" v-if="!formSubmit">Vamos lá?</p>
+            <p class="login-box-msg">Vamos lá?</p>
 
-            <form @submit.prevent="cadastro" @keydown="form.onKeydown($event)" v-if="!formSubmit">
+            <form @submit.prevent="cadastro" @keydown="form.onKeydown($event)">
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="Nome Completo" v-model="form.nome" required
                            :class="{ 'is-invalid': form.errors.has('nome') }">
@@ -19,7 +19,7 @@
                             :class="{ 'is-invalid': form.errors.has('tipos_estabelecimento_id') }" required>
                         <option value="">Tipo de Estabelecimento</option>
                         <option :value="tipo.id" v-for="tipo in tipos">
-                            {{tipo.nome}}
+                            {{ tipo.nome }}
                         </option>
                     </select>
                     <div class="input-group-append">
@@ -54,7 +54,7 @@
                             :class="{ 'is-invalid': form.errors.has('local_id') }">
                         <option value="">Onde nos encontrou</option>
                         <option :value="local.id" v-for="local in locais">
-                            {{local.nome}}
+                            {{ local.nome }}
                         </option>
                     </select>
                     <div class="input-group-append">
@@ -78,11 +78,7 @@
                 </div>
             </form>
 
-            <div class="alert alert-success text-center" v-else>
-                Cadastro realizado com sucesso! <b>Enviamos um email de confirmação</b>.
-            </div>
-
-            <div class="mt-3 text-center" v-if="!formSubmit">
+            <div class="mt-3 text-center">
                 <router-link :to="{name: 'login'}" class="text-center">
                     Já possui cadastrado? Clique aqui
                 </router-link>
@@ -93,44 +89,48 @@
 </template>
 
 <script>
-    import {mapActions, mapState} from 'vuex'
-    import {Form} from 'vform'
+import {mapActions, mapState} from 'vuex'
+import {Form} from 'vform'
 
-    export default {
-        name: "Registro",
-        async created() {
-            try {
-                const locais = await this.buscarLocais();
-                const tipos = await this.buscarTiposEstabelecimento();
-                this.locais = locais.data;
-                this.tipos = tipos.data;
-            } catch (e) {
-                this.$snotify.error('Falha ao carregar dados', 'Erro');
-            }
-        },
-        data() {
-            return {
-                formSubmit: false,
-                locais: [],
-                tipos: [],
-                form: new Form({
-                    nome: '',
-                    tipos_estabelecimento_id: '',
-                    nome_empresa: '',
-                    email: '',
-                    local_id: ''
-                })
-            }
-        },
-        methods: {
-            ...mapActions(['buscarLocais', 'buscarTiposEstabelecimento']),
-            cadastro() {
-                this.form.post('/api/cadastro').then(({data}) => {
-                    this.formSubmit = true;
-                });
-            }
-        },
-    }
+export default {
+    name: "Registro",
+    async created() {
+        try {
+            const locais = await this.buscarLocais();
+            const tipos = await this.buscarTiposEstabelecimento();
+            this.locais = locais.data;
+            this.tipos = tipos.data;
+        } catch (e) {
+            this.$snotify.error('Falha ao carregar dados', 'Erro');
+        }
+    },
+    data() {
+        return {
+            formSubmit: false,
+            locais: [],
+            tipos: [],
+            form: new Form({
+                nome: '',
+                tipos_estabelecimento_id: '',
+                nome_empresa: '',
+                email: '',
+                local_id: ''
+            })
+        }
+    },
+    methods: {
+        ...mapActions(['buscarLocais', 'buscarTiposEstabelecimento']),
+        cadastro() {
+            this.form.post('/api/cadastro').then(({data}) => {
+                this.formSubmit = true;
+                this.form.reset();
+                this.$swal.fire('Cadastro realizado com sucesso!', 'Enviamos um email de confirmação, caso não esteja na sua caixa de entrada, verificar o span.', 'success');
+            }).catch(error => {
+                this.$swal.fire('Ooops', 'Sistema instável no momento, tente novamente mais tarde!', 'error');
+            });
+        }
+    },
+}
 </script>
 
 <style scoped>

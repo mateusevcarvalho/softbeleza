@@ -43,7 +43,7 @@ class CreateUsuariosTable extends Migration
 
             $table->foreign('estabelecimento_id')
                 ->references('id')
-                ->on('tipos_estabelecimentos')
+                ->on('estabelecimentos')
                 ->onDelete('CASCADE');
         });
     }
