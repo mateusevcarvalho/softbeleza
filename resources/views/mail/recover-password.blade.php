@@ -12,4 +12,6 @@ Recuperar Senha
 
 Att,<br>
 SoftBeleza
+
+### contato@softbeleza.com.br|(31) 99124-3832
 @endcomponent
