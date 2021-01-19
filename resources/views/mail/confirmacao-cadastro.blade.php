@@ -11,7 +11,7 @@ Confirmar Cadastro
 @endcomponent
 
 Att,<br>
-##SoftBeleza
+## SoftBeleza
 
 
 ### contato@softbeleza.com.br|(31) 99124-3832
