@@ -11,8 +11,13 @@ class Tenant extends Model
     use SoftDeletes, Search;
 
     protected $fillable = [
-        'uuid', 'local_id'
+        'uuid', 'local_id', 'dias_avaliacao', 'individuo_id', 'asaas_client_id'
     ];
+
+    public function individuo()
+    {
+        return $this->belongsTo(Individuo::class);
+    }
 
     public function estabelecimentos()
     {
@@ -29,7 +34,8 @@ class Tenant extends Model
         return $this->hasMany(ServicoCategoria::class);
     }
 
-    public function profissionais() {
+    public function profissionais()
+    {
         return $this->hasMany(Profissional::class);
     }
 }

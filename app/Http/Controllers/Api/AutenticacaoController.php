@@ -29,7 +29,8 @@ class AutenticacaoController extends Controller
 {
     public function login(Request $request)
     {
-        $usuario = Usuario::with(['individuo', 'estabelecimento', 'controleAcessos'])->where('email', $request->email)->first();
+        $usuario = Usuario::with(['individuo', 'estabelecimento', 'controleAcessos', 'tenant'])
+            ->where('email', $request->email)->first();
         if (!$usuario || !Hash::check($request->password, $usuario->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
@@ -65,7 +66,8 @@ class AutenticacaoController extends Controller
 
         $objTenant = Tenant::create([
             'uuid' => Str::uuid(),
-            'local_id' => $formData['local_id']
+            'local_id' => $formData['local_id'],
+            'dias_avaliacao' => 7
         ]);
 
         $individuoEsabelecimento = ['nome' => $formData['nome_empresa'], 'tipo_pessoa' => 'J'];

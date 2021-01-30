@@ -35,7 +35,7 @@
             </div>
 
             <div class="col-sm-2 form-group">
-                <label>Tipo Estabelecimento <b class="text-danger">*</b></label>
+                <label>Tipo<b class="text-danger">*</b></label>
                 <select class="form-control" v-model="form.tipos_estabelecimento_id">
                     <option :value="tipo.id" v-for="tipo in tipos">
                         {{tipo.nome}}
