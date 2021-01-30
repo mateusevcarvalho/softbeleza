@@ -19,6 +19,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 
     <script src="//code.jivosite.com/widget/SUUqXQG0Q0" async></script>
+    <script>
+        window.Url = '{{url('')}}';
+    </script>
 </head>
 <body class="hold-transition sidebar-mini">
 <div id="app">

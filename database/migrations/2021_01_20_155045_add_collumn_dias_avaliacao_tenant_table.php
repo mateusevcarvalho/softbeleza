@@ -14,9 +14,16 @@ class AddCollumnDiasAvaliacaoTenantTable extends Migration
     public function up()
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->unsignedBigInteger('individuo_id')->nullable();
+            $table->unsignedBigInteger('individuo_id')->nullable()->after('local_id');
             $table->integer('dias_avaliacao')->after('uuid')->default(7);
             $table->string('asaas_client_id')->after('dias_avaliacao')->nullable();
+            $table->string('cartao_token')->after('asaas_client_id')->nullable();
+            $table->enum('tipo_pagamento', ['B', 'C'])->after('cartao_token')->nullable()->comment('Boleto; Cartão');
+
+            $table->foreign('individuo_id')
+                ->references('id')
+                ->on('individuos')
+                ->onDelete('CASCADE');
         });
     }
 

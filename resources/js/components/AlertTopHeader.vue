@@ -20,19 +20,16 @@
                 <p class="text-muted">Preencha os dados abaixo para realizar o pagamento.</p>
             </div>
 
-            <form class="mt-4">
+            <form class="mt-4" @submit.prevent="onSubmit">
                 <div class="row">
-                    <div class="col-sm-3 form-group">
+                    <div class="col-sm-4 form-group">
                         <label>CPF/CNPJ*</label>
-                        <input type="text" class="form-control" required v-model="form.individuo.documento">
+                        <input type="text" class="form-control" v-mask="['###.###.###-##', '##.###.###-####-##']"
+                               required v-model="form.individuo.documento">
                     </div>
-                    <div class="col-sm-5 form-group">
+                    <div class="col-sm-8 form-group">
                         <label>Nome Completo/Razão Social*</label>
                         <input type="text" class="form-control" required v-model="form.individuo.nome_razao_social">
-                    </div>
-                    <div class="col-sm-4 form-group">
-                        <label>Email*</label>
-                        <input type="email" class="form-control" required v-model="form.individuo.email">
                     </div>
 
                     <div class="col-sm-3 form-group">
@@ -91,13 +88,13 @@
                         </button>
                     </div>
                 </div>
-
-                <div class="overlay d-flex justify-content-center align-items-center" v-if="load">
-                    <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
             </form>
+
+            <div class="overlay d-flex justify-content-center align-items-center bg-blue-light" v-if="load">
+                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
         </b-modal>
     </div>
 </template>
@@ -105,6 +102,22 @@
 <script>
 import moment from "moment";
 import {mapActions} from "vuex";
+import axios from 'axios'
+
+const formInitial = {
+    individuo: {
+        documento: '',
+        nome_razao_social: '',
+        individuos_endereco: {
+            cep: '',
+            logradouro: '',
+            bairro: '',
+            cidade_id: '',
+            estado_id: '',
+            numero: ''
+        }
+    }
+}
 
 export default {
     name: "AlertTopHeader",
@@ -121,25 +134,28 @@ export default {
             diasRestantes: 0,
             cidades: [],
             estados: [],
-            form: {
-                individuo: {
-                    documento: '',
-                    email: '',
-                    nome_razao_social: '',
-                    individuos_endereco: {
-                        cep: '',
-                        logradouro: '',
-                        bairro: '',
-                        cidade_id: '',
-                        estado_id: '',
-                        numero: ''
-                    }
-                }
-            }
+            form: formInitial
         }
     },
     methods: {
-        ...mapActions(['buscaCep', 'buscaEstados', 'buscaCidades']),
+        ...mapActions(['buscaCep', 'buscaEstados', 'buscaCidades', 'handleCatchError']),
+
+        async onSubmit() {
+            this.load = true;
+            try {
+                const {data} = await axios.post('/api/cadastrar-pagamento', this.form);
+                this.$snotify.success(data.msg);
+                setTimeout(() => {
+                    this.load = false;
+                    this.$bvModal.hide('modal-pagamento');
+                    window.open(window.Url + '/checkout/' + data.data.uuid, '_blank');
+                }, 800);
+            } catch (e) {
+                this.load = false;
+                await this.$store.dispatch('handleCatchError', e);
+            }
+        },
+
         verificarDataAvaliacao() {
             const usuario = JSON.parse(localStorage.getItem('dataUsuario'));
             const diasAvaliacao = usuario.tenant.dias_avaliacao;

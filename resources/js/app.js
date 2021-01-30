@@ -56,6 +56,12 @@ Vue.use(money, {
     masked: false
 });
 
+Vue.directive('uppercase', {
+    update (el) {
+        el.value = el.value.toUpperCase()
+    },
+})
+
 Vue.component('menu-component', Menu);
 Vue.component('status-component', Status);
 Vue.component('header-component', Header);

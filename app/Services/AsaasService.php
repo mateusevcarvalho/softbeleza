@@ -5,6 +5,7 @@ namespace App\Services;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 
 class AsaasService
 {
@@ -29,14 +30,18 @@ class AsaasService
         return json_decode($response->getBody(), true);
     }
 
-    public function createPayment(array $data)
+    public function payment(array $data)
     {
-        $response = $this->client->request('POST', 'payments', ['json' => $data]);
-        return json_decode($response->getBody(), true);
+        try {
+            $response = $this->client->request('POST', 'payments', ['json' => $data]);
+            return json_decode($response->getBody(), true);
+        } catch (ClientException $exception) {
+            return json_decode($exception->getResponse()->getBody(), true);
+        }
     }
 
 
-    public function listPayment(int|string $id)
+    public function listPayment($id)
     {
         $response = $this->client->request('GET', "payments/$id");
         return json_decode($response->getBody(), true);

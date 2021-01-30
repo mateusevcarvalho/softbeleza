@@ -25,8 +25,12 @@ import Aniversariantes from "../pages/relatorios/aniversariantes/Aniversariantes
 import MeusDados from "../pages/meus-dados/MeusDados";
 import RecuperarSenha from "../pages/autenticacao/RecuperarSenha";
 import NovaSenha from "../pages/autenticacao/NovaSenha";
+import Checkout from "../pages/Checkout";
 
 const routes = [
+
+    {name: 'checkout', path: '/checkout/:uuid', component: Checkout, meta: {requireAuth: false}},
+
     {
         name: 'auth', path: '/', component: Auth, children: [
             {name: 'login', path: '', component: Login, meta: {requireAuth: false}},

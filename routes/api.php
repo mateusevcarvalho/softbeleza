@@ -68,4 +68,7 @@ Route::group(['namespace' => 'Api', 'middleware' => ['auth:sanctum', 'tenant']],
     Route::put('estornar-comanda/{id}', 'ComandasController@estornar');
 
     Route::put('meus-dados', 'AutenticacaoController@meusDados');
+
+    Route::post('cadastrar-pagamento', 'PagamentosController@cadastroPagamento');
+    Route::post('checkout', 'PagamentosController@checkout');
 });
