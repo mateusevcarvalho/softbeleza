@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Fatura;
 use App\Models\Individuo;
 use App\Models\Tenant;
+use App\Models\Usuario;
 use App\Services\AsaasService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class PagamentosController extends Controller
         $user = $request->user();
         $formData['individuo']['documento'] = so_numero($formData['individuo']['documento']);
         $formData['individuo']['nome'] = $formData['individuo']['nome_razao_social'];
-        $formData['individuo']['celular'] = $user->individuo->celular;
+        $formData['individuo']['celular'] = so_numero($formData['individuo']['celular']);
         $formData['individuo']['email_contato'] = $user->email;
 
         if (strlen($formData['individuo']['documento']) > 11) {
@@ -51,9 +52,10 @@ class PagamentosController extends Controller
         ]);
 
         DB::commit();
+        $usuario = Usuario::with(['individuo', 'estabelecimento', 'controleAcessos', 'tenant'])->find($user->id);
         return response()->json([
             'msg' => 'Cadastro realizado com Sucesso',
-            'data' => ['uuid' => $tenant->uuid]
+            'data' => ['uuid' => $tenant->uuid, 'usuario' => $usuario]
         ]);
     }
 
@@ -61,10 +63,11 @@ class PagamentosController extends Controller
     {
         $formData = $request->all();
         $tenant = Tenant::with('individuo.individuosEndereco')->where('uuid', $formData['uuid'])->first();
+        $faturaVencida = Fatura::where([['tenant_id', $tenant->id], ['status_pagamento', 'OVERDUE']])->first();
         $asaasService = new AsaasService();
-        $dataVencimento = now()->addDay()->format('Y-m-d');
 
-        if ($formData['tipo_pagamento'] === 'C') {
+        if ($formData['tipo_pagamento'] === 'C') { //PAGAMENTO CARTÃO
+            $dataVencimento = now()->format('Y-m-d');
             $response = $asaasService->payment([
                 'customer' => $tenant->asaas_client_id,
                 'billingType' => 'CREDIT_CARD',
@@ -95,7 +98,7 @@ class PagamentosController extends Controller
                 return response()->json(['success' => false, 'msg' => $response['errors'][0]['description']]);
             }
 
-            Fatura::create([
+            $dataFatura = [
                 'tenant_id' => $tenant->id,
                 'data_vencimento' => $dataVencimento,
                 'tipo_pagamento' => $formData['tipo_pagamento'],
@@ -105,25 +108,37 @@ class PagamentosController extends Controller
                 'bandeira_cartao' => $response['creditCard']['creditCardBrand'],
                 'final_cartao' => $response['creditCard']['creditCardNumber'],
                 'valor' => $response['value']
+            ];
+
+            if ($faturaVencida) {
+                $faturaVencida->update($dataFatura);
+            } else {
+                Fatura::create($dataFatura);
+            }
+
+            $tenant->update([
+                'cartao_token' => $response['creditCard']['creditCardToken'],
+                'tipo_pagamento' => $formData['tipo_pagamento'],
+                'dia_vencimento' => now()->format('d')
             ]);
 
-            $tenant->update(['cartao_token' => $response['creditCard']['creditCardToken'], 'tipo_pagamento' => $formData['tipo_pagamento']]);
             return response()->json(['success' => true, 'msg' => 'Pagamento realizado!']);
-        } else if ($formData['tipo_pagamento'] === 'B') {
+        } else if ($formData['tipo_pagamento'] === 'B') { // PAGAMENTO POR BOLETO
+            $dataVencimento = proximo_dia_util()->format('Y-m-d');
             $response = $asaasService->payment([
                 'customer' => $tenant->asaas_client_id,
                 'billingType' => 'BOLETO',
                 'dueDate' => $dataVencimento,
                 'value' => 49.9,
-                'description' => "SoftBeleza fatura " . now()->addDay()->format('m/Y'),
-                'externalReference' => now()->addDay()->format('m/Y'),
+                'description' => "SoftBeleza fatura " . proximo_dia_util()->format('m/Y'),
+                'externalReference' => proximo_dia_util()->format('m/Y'),
             ]);
 
             if (isset($response['errors']) && count($response['errors'])) {
                 return response()->json(['success' => false, 'msg' => $response['errors'][0]['description']]);
             }
 
-            Fatura::create([
+            $dataFatura = [
                 'tenant_id' => $tenant->id,
                 'data_vencimento' => $dataVencimento,
                 'tipo_pagamento' => $formData['tipo_pagamento'],
@@ -132,12 +147,39 @@ class PagamentosController extends Controller
                 'status_pagamento' => $response['status'],
                 'url_boleto' => $response['bankSlipUrl'],
                 'valor' => $response['value']
+            ];
+
+            if ($faturaVencida) {
+                $faturaVencida->update($dataFatura);
+            } else {
+                Fatura::create($dataFatura);
+            }
+
+            $tenant->update([
+                'tipo_pagamento' => $formData['tipo_pagamento'],
+                'dia_vencimento' => proximo_dia_util()->format('d')
             ]);
 
-            $tenant->update(['tipo_pagamento' => $formData['tipo_pagamento']]);
             return response()->json(['success' => true, 'msg' => 'Boleto gerado com sucesso!', 'data' => [
                 'url_boleto' => $response['bankSlipUrl']
             ]]);
         }
+    }
+
+    public function verificaCheckout($uuid)
+    {
+        $tenant = Tenant::where('uuid',$uuid)->first();
+        $faturas = Fatura::where([['tenant_id', $tenant->id]])->get()->toArray();
+        $faturasVencidas = Fatura::where([['tenant_id', $tenant->id], ['status_pagamento', 'OVERDUE']])->get()->toArray();
+        if (count($faturas)) {
+            $cobrar = false;
+            if (count($faturasVencidas)) {
+                $cobrar = true;
+            }
+        } else {
+            $cobrar = true;
+        }
+
+        return response()->json(compact('cobrar'));
     }
 }

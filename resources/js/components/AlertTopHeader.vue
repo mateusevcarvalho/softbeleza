@@ -7,7 +7,7 @@
         para testar o SoftBeleza gratuitamente. Após esse período, continue usando mediante pagamento.
 
         <span class="float-right mb-2" v-if="$auth.can('administrativo')"
-              @click.prevent="vm.$bvModal.show('modal-pagamento')">
+              @click.prevent="onEfetuarPagamento">
             <a href="javascript:void(0)" class="btn btn-sm btn-warning">Efetuar Pagamento</a>
         </span>
 
@@ -22,20 +22,24 @@
 
             <form class="mt-4" @submit.prevent="onSubmit">
                 <div class="row">
-                    <div class="col-sm-4 form-group">
+                    <div class="col-sm-3 form-group">
                         <label>CPF/CNPJ*</label>
                         <input type="text" class="form-control" v-mask="['###.###.###-##', '##.###.###-####-##']"
                                required v-model="form.individuo.documento">
                     </div>
-                    <div class="col-sm-8 form-group">
+                    <div class="col-sm-6 form-group">
                         <label>Nome Completo/Razão Social*</label>
                         <input type="text" class="form-control" required v-model="form.individuo.nome_razao_social">
                     </div>
-
+                    <div class="col-sm-3 form-group">
+                        <label>Celular*</label>
+                        <input type="text" class="form-control" placeholder="(__) _____-____" v-mask="'(##) #####-####'"
+                               required v-model="form.individuo.celular">
+                    </div>
                     <div class="col-sm-3 form-group">
                         <label>Cep </label>
                         <input type="text" class="form-control" v-model="form.individuo.individuos_endereco.cep"
-                               v-mask="'#####-###'" @change="cepOnChange">
+                               v-mask="'#####-###'" @change="cepOnChange" placeholder="_____-___">
                     </div>
 
                     <div class="col-sm-7 form-group">
@@ -90,7 +94,7 @@
                 </div>
             </form>
 
-            <div class="overlay d-flex justify-content-center align-items-center bg-blue-light" v-if="load">
+            <div class="overlay d-flex justify-content-center align-items-center" v-if="load">
                 <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
@@ -107,6 +111,7 @@ import axios from 'axios'
 const formInitial = {
     individuo: {
         documento: '',
+        celular: '',
         nome_razao_social: '',
         individuos_endereco: {
             cep: '',
@@ -140,6 +145,15 @@ export default {
     methods: {
         ...mapActions(['buscaCep', 'buscaEstados', 'buscaCidades', 'handleCatchError']),
 
+        onEfetuarPagamento() {
+            const usuario = JSON.parse(localStorage.getItem('dataUsuario'));
+            if (usuario.tenant.individuo_id) {
+                window.open(window.Url + '/checkout/' + usuario.tenant.uuid, '_blank');
+            } else {
+                this.$bvModal.show('modal-pagamento');
+            }
+        },
+
         async onSubmit() {
             this.load = true;
             try {
@@ -148,6 +162,7 @@ export default {
                 setTimeout(() => {
                     this.load = false;
                     this.$bvModal.hide('modal-pagamento');
+                    localStorage.setItem('dataUsuario', JSON.stringify(data.data.usuario));
                     window.open(window.Url + '/checkout/' + data.data.uuid, '_blank');
                 }, 800);
             } catch (e) {

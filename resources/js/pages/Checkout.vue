@@ -1,5 +1,6 @@
 <template>
     <div class="container">
+        <load-full-component :load="loadPage"/>
         <div class="py-5 text-center">
             <img class="d-block mx-auto mb-4" src="/images/softbeleza-logo-azul.png" alt="Logo SoftBeleza">
             <h2>Pagamento Mensalidade SoftBeleza</h2>
@@ -84,7 +85,7 @@
             </div>
         </div>
 
-        <footer class="my-5 pt-5 text-muted text-center text-small">
+        <footer class="pt-5 text-muted text-center text-small">
             <p class="mb-1">&copy; {{ anoHoje }} SoftBeleza</p>
             <!--            <ul class="list-inline">-->
             <!--                <li class="list-inline-item"><a href="#">Privacidade</a></li>-->
@@ -111,14 +112,38 @@ const formInitial = {
 
 export default {
     name: "Checkout",
-    created() {
+    async created() {
         this.form.uuid = this.$route.params.uuid;
+        const {data} = await axios.get('/api/checkout-cobrar/' + this.$route.params.uuid);
+        if (!data.cobrar) {
+            this.$swal.fire({
+                allowOutsideClick: false,
+                icon: 'success',
+                title: 'Pagamento gerado',
+                html: 'Sua conta não possui débitos pendentes.'
+            }).then((_) => {
+                this.form = {
+                    uuid: this.$route.params.uuid,
+                    tipo_pagamento: 'C',
+                    nome_cc: '',
+                    numero_cc: '',
+                    expiracao_cc: '',
+                    cvv_cc: '',
+                }
+
+                this.loadPage = true;
+                window.location.href = Url + '/';
+            });
+        }
+
+        this.loadPage = false;
     },
     data() {
         return {
             diaHoje: parseInt(moment().format('DD')) >= 30 ? 30 : parseInt(moment().format('DD')),
             anoHoje: moment().format('YYYY'),
             load: false,
+            loadPage: true,
             radioOptions: [
                 {text: 'Cartão de Crédito', value: 'C'},
                 {text: 'Boleto', value: 'B'},
@@ -131,6 +156,7 @@ export default {
             try {
                 this.load = true;
                 const {data} = await axios.post('/api/checkout', this.form);
+                console.log(data)
                 if (data?.success) {
                     if (this.form.tipo_pagamento === 'C') {
                         this.$swal.fire({
@@ -162,7 +188,7 @@ export default {
                 this.load = false;
             } catch (e) {
                 this.load = false;
-                await this.$store.dispatch('handleCatchError', e);
+                await this.$store.dispatch('handleCatchError', e.response);
             }
         }
     }

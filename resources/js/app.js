@@ -31,6 +31,7 @@ import 'echarts/lib/chart/line'
 import 'echarts/lib/chart/bar'
 import 'echarts/lib/component/tooltip'
 import 'sweetalert2/dist/sweetalert2.min.css';
+import LoadFull from "./components/LoadFull";
 
 // If you want to use ECharts extensions, just import the extension package and it will work
 // Taking ECharts-GL as an example:
@@ -64,6 +65,7 @@ Vue.directive('uppercase', {
 
 Vue.component('menu-component', Menu);
 Vue.component('status-component', Status);
+Vue.component('load-full-component', LoadFull);
 Vue.component('header-component', Header);
 Vue.component('header-top-component', HeaderTop);
 Vue.component('page-component', Page);

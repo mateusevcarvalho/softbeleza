@@ -71,4 +71,5 @@ Route::group(['namespace' => 'Api', 'middleware' => ['auth:sanctum', 'tenant']],
 
     Route::post('cadastrar-pagamento', 'PagamentosController@cadastroPagamento');
     Route::post('checkout', 'PagamentosController@checkout');
+    Route::get('checkout-cobrar/{uuid}', 'PagamentosController@verificaCheckout');
 });

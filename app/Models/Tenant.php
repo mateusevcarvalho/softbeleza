@@ -11,7 +11,11 @@ class Tenant extends Model
     use SoftDeletes, Search;
 
     protected $fillable = [
-        'uuid', 'local_id', 'dias_avaliacao', 'individuo_id', 'asaas_client_id', 'cartao_token'
+        'uuid', 'local_id', 'dias_avaliacao', 'individuo_id', 'asaas_client_id', 'cartao_token', 'dia_vencimento'
+    ];
+
+    protected $hidden = [
+        'asaas_client_id', 'cartao_token'
     ];
 
     public function individuo()
